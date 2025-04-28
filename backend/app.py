@@ -1,75 +1,60 @@
-# 📚 Imports
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 import pandas as pd
-from sklearn.neighbors import NearestNeighbors
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-# 📚 Load saved models
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app)  # Allow all origins by default
+
+# Load models
 with open('model/tfidf_matrix.pkl', 'rb') as f:
     tfidf_matrix = pickle.load(f)
-
-with open('model/knn_model.pkl', 'rb') as f:
-    knn_model = pickle.load(f)
 
 with open('model/movie_indices.pkl', 'rb') as f:
     movie_indices = pickle.load(f)
 
-with open('model/tfidf_vectorizer.pkl', 'rb') as f:
-    tfidf_vectorizer = pickle.load(f)
+with open('model/cosine_sim.pkl', 'rb') as f:
+    cosine_sim = pickle.load(f)
 
-movies = pd.read_csv('model/movies_metadata.csv')
+# Load movies data if needed
+movies = pd.read_csv('model/movies.csv')
 
-# 📚 Initialize app
-app = Flask(__name__)
-
-# 📚 Recommend function
-def recommend_movies(movie_features_text=None, top_n=10, is_new_movie=False, existing_movie_id=None):
-    if not is_new_movie:
-        idx = movie_indices.get(existing_movie_id, None)
-        if idx is None:
-            raise ValueError("Movie ID not found!")
-        distances, indices = knn_model.kneighbors(tfidf_matrix[idx], n_neighbors=top_n+1)
-        sim_indices = indices.flatten()[1:]  # exclude self
-        recommended_movies = movies.iloc[sim_indices][['movieId', 'title']]
-    else:
-        movie_vec = tfidf_vectorizer.transform([movie_features_text])
-        distances, indices = knn_model.kneighbors(movie_vec, n_neighbors=top_n)
-        sim_indices = indices.flatten()
-        recommended_movies = movies.iloc[sim_indices][['movieId', 'title']]
+# Function to recommend movies
+def recommend_movies(movie_ids):
+    sim_scores = {}
     
-    return recommended_movies.reset_index(drop=True)
+    for movie_id in movie_ids:
+        idx = movie_indices.get(movie_id)
+        if idx is not None:
+            scores = list(enumerate(cosine_sim[idx]))
+            for i, score in scores:
+                if i not in movie_ids:  # Avoid recommending the input movies
+                    sim_scores[i] = sim_scores.get(i, 0) + score
+    
+    sorted_scores = sorted(sim_scores.items(), key=lambda x: x[1], reverse=True)
+    recommended_movie_indices = [i for i, _ in sorted_scores[:20]]
+    recommended_movies = movies.iloc[recommended_movie_indices][['movieId', 'title']].to_dict(orient='records')
+    
+    return recommended_movies
 
-# 📚 Routes
-@app.route('/recommend_by_movieid', methods=['POST'])
-def recommend_by_movieid():
-    data = request.get_json()
-    movie_id = data.get('movieId')
-    if movie_id is None:
-        return jsonify({'error': 'movieId not provided'}), 400
-    try:
-        recs = recommend_movies(existing_movie_id=movie_id)
-        return jsonify(recs.to_dict(orient='records'))
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/recommend_by_features', methods=['POST'])
-def recommend_by_features():
-    data = request.get_json()
-    features_text = data.get('features')
-    if features_text is None:
-        return jsonify({'error': 'features not provided'}), 400
-    try:
-        recs = recommend_movies(movie_features_text=features_text, is_new_movie=True)
-        return jsonify(recs.to_dict(orient='records'))
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# 📚 Home
+# Routes
 @app.route('/')
-def home():
-    return "✅ Movie Recommendation Backend Running"
+def index():
+    return "Aether Movie Match Backend is Running!"
 
-# 📚 Run server
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    data = request.get_json()
+    movie_ids = data.get('movie_ids', [])
+    
+    if not movie_ids:
+        return jsonify({"error": "No movie_ids provided."}), 400
+    
+    recommendations = recommend_movies(movie_ids)
+    return jsonify(recommendations)
+
+# Run the app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
