@@ -1,15 +1,10 @@
 import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
-import AuthProvider from "@/providers/auth-provider"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Movie Match",
-  description: "Get personalized movie recommendations based on your preferences",
+  title: "Movie Recommendation Website",
+  description: "Get personalized movie recommendations",
     generator: 'v0.dev'
 }
 
@@ -20,13 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-            {children}
-          </ThemeProvider>
-        </AuthProvider>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

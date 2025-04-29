@@ -1,26 +1,8 @@
-import MovieSelection from "@/components/movie-selection"
-import { getPopularMovies } from "@/lib/tmdb"
-import Navbar from "@/components/navbar"
-
-export default async function Home() {
-  // Fetch popular movies for the selection page
-  const movies = await getPopularMovies()
-
+export default function Home() {
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl font-bold text-center mb-2">Movie Match</h1>
-            <p className="text-xl text-center mb-8 text-slate-300">
-              Select at least 5 movies you've enjoyed to get personalized recommendations
-            </p>
-
-            <MovieSelection movies={movies} />
-          </div>
-        </div>
-      </main>
-    </>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <h1 className="text-4xl font-bold">Movie Recommendation Website</h1>
+      <p className="mt-4 text-xl">Coming soon...</p>
+    </main>
   )
 }
