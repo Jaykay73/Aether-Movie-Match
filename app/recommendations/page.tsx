@@ -3,6 +3,7 @@ import { getMovieRecommendations } from "@/lib/recommendations"
 import { getMovieDetails } from "@/lib/tmdb"
 import RecommendationList from "@/components/recommendation-list"
 import LoadingSkeleton from "@/components/loading-skeleton"
+import Navbar from "@/components/navbar"
 import { Suspense } from "react"
 
 export default async function RecommendationsPage({
@@ -25,27 +26,30 @@ export default async function RecommendationsPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-2">Your Recommendations</h1>
-          <p className="text-xl text-center mb-8 text-slate-300">Based on your movie preferences</p>
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-4xl font-bold text-center mb-2">Your Recommendations</h1>
+            <p className="text-xl text-center mb-8 text-slate-300">Based on your movie preferences</p>
 
-          <Suspense fallback={<LoadingSkeleton />}>
-            <RecommendationContent selectedMovies={selectedMovies} />
-          </Suspense>
+            <Suspense fallback={<LoadingSkeleton />}>
+              <RecommendationContent selectedMovies={selectedMovies} />
+            </Suspense>
 
-          <div className="mt-8 text-center">
-            <a
-              href="/"
-              className="inline-block px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors"
-            >
-              Select Different Movies
-            </a>
+            <div className="mt-8 text-center">
+              <a
+                href="/"
+                className="inline-block px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-colors"
+              >
+                Select Different Movies
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   )
 }
 

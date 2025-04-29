@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { Heart, Plus, Star, X, Check, Clock } from "lucide-react"
 import type { Movie } from "@/lib/types"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 interface MovieDetailProps {
   movie: Movie
@@ -12,6 +14,8 @@ interface MovieDetailProps {
 }
 
 export default function MovieDetail({ movie, onClose }: MovieDetailProps) {
+  const { data: session } = useSession()
+  const router = useRouter()
   const [inWatchlist, setInWatchlist] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
 
@@ -26,6 +30,63 @@ export default function MovieDetail({ movie, onClose }: MovieDetailProps) {
 
   // Get top cast
   const topCast = movie.credits?.cast?.slice(0, 5) || []
+
+  const handleWatchlistToggle = async () => {
+    if (!session) {
+      router.push("/auth/signin")
+      return
+    }
+
+    try {
+      setInWatchlist((prev) => !prev)
+
+      if (!inWatchlist) {
+        // Add to watchlist
+        await fetch("/api/watchlist/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ movieId: movie.id, tmdbId: movie.id }),
+        })
+      } else {
+        // Remove from watchlist
+        await fetch("/api/watchlist/remove", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ movieId: movie.id }),
+        })
+      }
+    } catch (error) {
+      console.error("Error toggling watchlist:", error)
+      setInWatchlist((prev) => !prev) // Revert on error
+    }
+  }
+
+  const handleLikeToggle = async () => {
+    if (!session) {
+      router.push("/auth/signin")
+      return
+    }
+
+    try {
+      const newLikeState = !isLiked
+      setIsLiked(newLikeState)
+
+      await fetch("/api/movies/like", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ movieId: movie.id, tmdbId: movie.id, isLiked: newLikeState }),
+      })
+    } catch (error) {
+      console.error("Error toggling like:", error)
+      setIsLiked((prev) => !prev) // Revert on error
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 overflow-y-auto">
@@ -72,11 +133,7 @@ export default function MovieDetail({ movie, onClose }: MovieDetailProps) {
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Button
-                onClick={() => setInWatchlist((prev) => !prev)}
-                className="flex-1"
-                variant={inWatchlist ? "default" : "outline"}
-              >
+              <Button onClick={handleWatchlistToggle} className="flex-1" variant={inWatchlist ? "default" : "outline"}>
                 {inWatchlist ? (
                   <>
                     <Check className="mr-2 h-4 w-4" />
@@ -91,7 +148,7 @@ export default function MovieDetail({ movie, onClose }: MovieDetailProps) {
               </Button>
 
               <Button
-                onClick={() => setIsLiked((prev) => !prev)}
+                onClick={handleLikeToggle}
                 variant="outline"
                 className={isLiked ? "bg-red-500 text-white border-red-500" : ""}
               >

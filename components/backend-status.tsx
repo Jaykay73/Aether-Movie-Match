@@ -43,12 +43,12 @@ export default function BackendStatus() {
       {status === "online" ? (
         <>
           <CheckCircle2 className="w-4 h-4" />
-          <span>Using personalized recommendations</span>
+          <span>Using Render backend for recommendations</span>
         </>
       ) : (
         <>
           <AlertCircle className="w-4 h-4" />
-          <span>Using popular recommendations (backend offline)</span>
+          <span>Using fallback recommendations (backend offline)</span>
         </>
       )}
     </div>

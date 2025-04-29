@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
-// Backend URL - in production, this would be an environment variable
-const BACKEND_URL = "http://localhost:5000/recommend"
+// Updated backend URL to use the Render deployment
+const BACKEND_URL = "https://movie-recommender-backend-oye5.onrender.com/recommend"
 
 export async function GET() {
   try {

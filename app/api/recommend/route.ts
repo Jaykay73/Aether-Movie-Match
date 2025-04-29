@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { getFallbackRecommendations } from "@/lib/fallback-recommendations"
 
-// Since the backend is in the root directory, we can use a relative path
-const BACKEND_URL = "/api/backend/recommend"
+// Updated backend URL to use the Render deployment
+const BACKEND_URL = "https://movie-recommender-backend-oye5.onrender.com/recommend"
 
 export async function POST(request: Request) {
   try {
