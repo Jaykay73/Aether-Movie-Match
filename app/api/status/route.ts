@@ -7,7 +7,7 @@ export async function GET() {
   try {
     // Try to connect to the backend with a timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 3000)
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // Increased timeout for external service
 
     const response = await fetch(BACKEND_URL, {
       method: "HEAD",

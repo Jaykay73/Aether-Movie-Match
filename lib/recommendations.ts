@@ -94,7 +94,7 @@ export async function getMovieRecommendations(selectedTmdbIds: string[]): Promis
       return getFallbackRecommendations(selectedTmdbIds)
     }
 
-    // Call our API route that connects to the backend
+    // Call our API route that connects to the Render backend
     const response = await fetch("/api/recommend", {
       method: "POST",
       headers: {

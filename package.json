@@ -63,7 +63,6 @@
     "prisma": "latest",
     "@prisma/client": "latest",
     "next-auth": "latest",
-    "react-icons": "latest",
     "bcryptjs": "latest",
     "@auth/prisma-adapter": "latest"
   },

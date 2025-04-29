@@ -3,6 +3,7 @@ import { getMovieRecommendations } from "@/lib/recommendations"
 import { getMovieDetails } from "@/lib/tmdb"
 import RecommendationList from "@/components/recommendation-list"
 import LoadingSkeleton from "@/components/loading-skeleton"
+import BackendStatus from "@/components/backend-status"
 import Navbar from "@/components/navbar"
 import { Suspense } from "react"
 
@@ -32,7 +33,11 @@ export default async function RecommendationsPage({
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-4xl font-bold text-center mb-2">Your Recommendations</h1>
-            <p className="text-xl text-center mb-8 text-slate-300">Based on your movie preferences</p>
+            <p className="text-xl text-center mb-2 text-slate-300">Based on your movie preferences</p>
+
+            <div className="flex justify-center mb-6">
+              <BackendStatus />
+            </div>
 
             <Suspense fallback={<LoadingSkeleton />}>
               <RecommendationContent selectedMovies={selectedMovies} />

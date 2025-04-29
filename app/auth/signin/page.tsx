@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { FcGoogle } from "react-icons/fc"
 
 export default function SignIn() {
   const [email, setEmail] = useState("")
@@ -187,20 +186,6 @@ export default function SignIn() {
               </form>
             </TabsContent>
           </Tabs>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700"></div>
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-background text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <Button variant="outline" className="w-full" onClick={() => signIn("google", { callbackUrl: "/" })}>
-            <FcGoogle className="mr-2 h-5 w-5" />
-            Google
-          </Button>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
           By signing in, you agree to our Terms of Service and Privacy Policy
