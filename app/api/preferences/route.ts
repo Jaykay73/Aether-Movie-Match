@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import prisma from "@/lib/db"
+import prisma from "@/lib/prisma"
 
 // Get user's preferences
 export async function GET(request: Request) {
