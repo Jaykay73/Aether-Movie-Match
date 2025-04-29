@@ -46,6 +46,31 @@ export default function SignIn() {
     }
   }
 
+  const handleDemoLogin = async () => {
+    setIsLoading(true)
+    setError("")
+
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: "demo@example.com",
+        password: "password123",
+      })
+
+      if (result?.error) {
+        setError("Demo login failed. Please try again.")
+        setIsLoading(false)
+        return
+      }
+
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      setError("An error occurred. Please try again.")
+      setIsLoading(false)
+    }
+  }
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -135,6 +160,25 @@ export default function SignIn() {
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-2 bg-background text-muted-foreground">Or</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleDemoLogin}
+                  disabled={isLoading}
+                >
+                  Try with Demo Account
                 </Button>
               </form>
             </TabsContent>
