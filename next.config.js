@@ -10,6 +10,9 @@ const nextConfig = {
   images: {
     domains: ["image.tmdb.org"],
   },
+  experimental: {
+    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
+  },
 }
 
 module.exports = nextConfig
