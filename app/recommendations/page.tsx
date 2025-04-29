@@ -2,6 +2,8 @@ import { redirect } from "next/navigation"
 import { getMovieRecommendations } from "@/lib/recommendations"
 import { getMovieDetails } from "@/lib/tmdb"
 import RecommendationList from "@/components/recommendation-list"
+import LoadingSkeleton from "@/components/loading-skeleton"
+import { Suspense } from "react"
 
 export default async function RecommendationsPage({
   searchParams,
@@ -22,16 +24,6 @@ export default async function RecommendationsPage({
     redirect("/")
   }
 
-  // Get recommendations based on selected movies
-  const recommendedMovieIds = await getMovieRecommendations(selectedMovies)
-
-  // Fetch details for each recommended movie
-  const recommendedMovies = await Promise.all(
-    recommendedMovieIds.map(async (id) => {
-      return await getMovieDetails(id)
-    }),
-  )
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -39,7 +31,9 @@ export default async function RecommendationsPage({
           <h1 className="text-4xl font-bold text-center mb-2">Your Recommendations</h1>
           <p className="text-xl text-center mb-8 text-slate-300">Based on your movie preferences</p>
 
-          <RecommendationList movies={recommendedMovies} />
+          <Suspense fallback={<LoadingSkeleton />}>
+            <RecommendationContent selectedMovies={selectedMovies} />
+          </Suspense>
 
           <div className="mt-8 text-center">
             <a
@@ -53,4 +47,30 @@ export default async function RecommendationsPage({
       </div>
     </main>
   )
+}
+
+async function RecommendationContent({ selectedMovies }: { selectedMovies: string[] }) {
+  // Get recommendations based on selected movies
+  const recommendedMovieIds = await getMovieRecommendations(selectedMovies)
+
+  // Fetch details for each recommended movie
+  const recommendedMovies = await Promise.all(
+    recommendedMovieIds.map(async (id) => {
+      return await getMovieDetails(id)
+    }),
+  )
+
+  // Filter out any failed movie fetches
+  const validMovies = recommendedMovies.filter((movie) => movie.title !== "Movie information unavailable")
+
+  // If no recommendations were found
+  if (validMovies.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-400">No recommendations found. Please try selecting different movies.</p>
+      </div>
+    )
+  }
+
+  return <RecommendationList movies={validMovies} />
 }

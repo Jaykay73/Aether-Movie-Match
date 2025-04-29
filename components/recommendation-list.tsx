@@ -12,7 +12,9 @@ export default function RecommendationList({ movies }: RecommendationListProps) 
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
 
   // Extract all unique genres from the movies
-  const allGenres = Array.from(new Set(movies.flatMap((movie) => movie.genres?.map((genre) => genre.name) || [])))
+  const allGenres = Array.from(
+    new Set(movies.flatMap((movie) => movie.genres?.map((genre) => genre.name) || [])),
+  ).sort()
 
   // Filter movies by selected genre if any
   const filteredMovies = selectedGenre

@@ -40,7 +40,9 @@ export async function getPopularMovies(): Promise<Movie[]> {
 // Fetch movie details from TMDB API
 export async function getMovieDetails(tmdbId: string): Promise<Movie> {
   try {
-    const response = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`)
+    const response = await fetch(
+      `${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US&append_to_response=credits,videos`,
+    )
 
     if (!response.ok) {
       throw new Error(`Failed to fetch movie details for ID: ${tmdbId}`)
@@ -58,6 +60,8 @@ export async function getMovieDetails(tmdbId: string): Promise<Movie> {
       vote_average: data.vote_average,
       runtime: data.runtime,
       genres: data.genres,
+      credits: data.credits,
+      videos: data.videos,
     }
   } catch (error) {
     console.error(`Error fetching movie details for ID ${tmdbId}:`, error)

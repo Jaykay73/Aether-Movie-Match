@@ -9,6 +9,28 @@ export interface Movie {
   runtime?: number
   genres?: { id: number; name: string }[]
   recommendationCount?: number
+  credits?: {
+    cast?: {
+      id: number
+      name: string
+      character: string
+      profile_path?: string
+    }[]
+    crew?: {
+      id: number
+      name: string
+      job: string
+    }[]
+  }
+  videos?: {
+    results: {
+      id: string
+      key: string
+      name: string
+      site: string
+      type: string
+    }[]
+  }
 }
 
 export interface MovieLink {

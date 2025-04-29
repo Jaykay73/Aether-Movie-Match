@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Movie Recommender",
+  title: "Movie Match",
   description: "Get personalized movie recommendations based on your preferences",
     generator: 'v0.dev'
 }

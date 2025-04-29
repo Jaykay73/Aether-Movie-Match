@@ -1,4 +1,5 @@
 import type { MovieLink } from "./types"
+import { getFallbackRecommendations } from "./fallback-recommendations"
 
 // In-memory cache for movie links
 let movieLinksCache: MovieLink[] | null = null
@@ -58,7 +59,19 @@ async function getMovieLinks(): Promise<MovieLink[]> {
   }
 }
 
-// Convert movieIds to tmdbIds using the links data
+// Convert TMDB IDs to movie IDs
+async function convertToMovieIds(tmdbIds: string[]): Promise<string[]> {
+  const links = await getMovieLinks()
+
+  return tmdbIds
+    .map((tmdbId) => {
+      const link = links.find((link) => link.tmdbId === tmdbId)
+      return link?.movieId
+    })
+    .filter((id): id is string => id !== undefined)
+}
+
+// Convert movie IDs to TMDB IDs
 async function convertToTmdbIds(movieIds: string[]): Promise<string[]> {
   const links = await getMovieLinks()
 
@@ -70,35 +83,54 @@ async function convertToTmdbIds(movieIds: string[]): Promise<string[]> {
     .filter((id): id is string => id !== undefined)
 }
 
-// Mock function to simulate backend recommendation API call
-// In a real app, this would make an actual API call to the backend
-async function fetchRecommendations(movieIds: string[]): Promise<string[]> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  // This is a mock implementation
-  // In a real app, you would call your backend API
-  // For now, we'll return some hardcoded movieIds as recommendations
-  const mockRecommendations = ["862", "597", "120", "11216", "58", "4993", "79132", "1726", "109445", "76341"]
-
-  return mockRecommendations
-}
-
 // Get movie recommendations based on selected movies
-export async function getMovieRecommendations(selectedMovieIds: string[]): Promise<string[]> {
+export async function getMovieRecommendations(selectedTmdbIds: string[]): Promise<string[]> {
   try {
-    // Convert selected TMDB IDs to movie IDs using the links data
-    const movieIds = await convertToTmdbIds(selectedMovieIds)
+    // Convert selected TMDB IDs to movie IDs
+    const movieIds = await convertToMovieIds(selectedTmdbIds)
 
-    // Call the backend recommendation API
-    const recommendedMovieIds = await fetchRecommendations(movieIds)
+    if (movieIds.length === 0) {
+      console.warn("No valid movie IDs found for the selected TMDB IDs")
+      return getFallbackRecommendations(selectedTmdbIds)
+    }
 
-    // Convert recommended movie IDs back to TMDB IDs
-    const recommendedTmdbIds = await convertToTmdbIds(recommendedMovieIds)
+    // Call our API route that connects to the backend
+    const response = await fetch("/api/recommend", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ movieIds }),
+    })
+
+    if (!response.ok) {
+      console.error("Backend recommendation error")
+      return getFallbackRecommendations(selectedTmdbIds)
+    }
+
+    const recommendedMovieIds = await response.json()
+
+    if (!Array.isArray(recommendedMovieIds) || recommendedMovieIds.length === 0) {
+      console.warn("Backend returned no recommendations or invalid format")
+      return getFallbackRecommendations(selectedTmdbIds)
+    }
+
+    // Convert recommended movie IDs back to TMDB IDs if they're not already
+    let recommendedTmdbIds = recommendedMovieIds
+
+    // Check if the IDs look like TMDB IDs or need conversion
+    if (recommendedMovieIds.some((id) => !id.toString().match(/^\d+$/))) {
+      recommendedTmdbIds = await convertToTmdbIds(recommendedMovieIds)
+    }
+
+    if (recommendedTmdbIds.length === 0) {
+      console.warn("No valid TMDB IDs found for the recommended movie IDs")
+      return getFallbackRecommendations(selectedTmdbIds)
+    }
 
     return recommendedTmdbIds
   } catch (error) {
     console.error("Error getting movie recommendations:", error)
-    return []
+    return getFallbackRecommendations(selectedTmdbIds)
   }
 }
